@@ -1,0 +1,78 @@
+---
+title: "Preliminary Analyses RRI Tool Kit"
+author: "Juan C. Correa"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# Intro
+This is a short preliminary analysis of the contents included in the sample of projects indexed by RRI Tool Kit. By employing web scraping techniques, we were able to retrieve a total of 1,414 documents, along with a brief document description, their titles, and the discipline they belong to. Preliminary inspections to the database revealed that each document belonged to at least one of the following disciplines, but most documents show multidisciplinary categorizations. This multidisciplinarity led us to map the information of each document and its disciplinary categorization by following network foundations.
+
+```{r}
+setwd("~/Bilder/Documents/PaperOtoFelipe/")
+library(readxl)
+LT <- read_excel("RawDataRRI.xlsx", sheet = "Raw LowerTags")
+library(tidyr)
+disciplines <- LT[1:47]
+Disciplines <- disciplines %>% 
+  pivot_longer(!c(ID, Cases_Title, Cases_LowerTags), 
+               names_to = "Discipline", values_to = "sum")
+rm(disciplines)
+unique(Disciplines$Discipline)
+```
+
+We parsed the raw database as network data by using the unique numeric ID that identifies each document and the disciplines associated with each ID. For example, the following documents:
+
+* Document 15: "Responsible Research and Innovation (RRI) in Plant Sciences"
+
+* Document 582: "Ethical Tensions from New Technology. The Case of Agricultural Biotechnology", and 
+
+* Document 1379: "Moving Forward Responsibly: From Agribiotechnology to Agrinanotechnology in India"
+
+were all classified into the category of Agrobiotechnology. The network mapping procedure allowed us to understand what other disciplines proved to be relevant for these three documents beyond Agrobiotechnology. This analysis allowed us to provide a set of quantitative metrics that capture the interdisciplinarity of each document/discipline.
+
+# Token Example
+For the sake of illustrative purposes, we turn the attention to a pairwise comparison between Agrobiotechnology and Civil Society and Organizations. This comparison initializes by filtering the records that belong to these disciplines
+
+```{r}
+library(dplyr)
+Agrobiotechnology <- filter(LT, LT$agribiotechnology == 1)
+Agrobiotechnology <- Agrobiotechnology %>% pivot_longer(
+  !c(ID, Cases_Title, Cases_LowerTags), 
+  names_to = "Discipline", values_to = "sum")
+Agrobiotechnology[2:3] <- NULL
+Agrobiotechnology <- filter(Agrobiotechnology, sum == 1)
+Agrobiotechnology[3] <- NULL
+
+CS <- filter(LT, LT$`Civil Society Organizations` == 1)
+CS <- CS %>% pivot_longer(
+  !c(ID, Cases_Title, Cases_LowerTags), 
+  names_to = "Discipline", values_to = "sum")
+CS[2:3] <- NULL
+CS <- filter(CS, sum == 1)
+CS[3] <- NULL
+```
+
+After applying these filters, we parsed this data as network data as follows:
+
+```{r}
+library(network)
+net_agro <- network(Agrobiotechnology, matrix.type = "edgelist", directed = FALSE, bipartite = FALSE)
+net_agro
+```
+
+The network of Agrobiotechnology revealed a total of 20 vertices, and 30 edges that connect these vertices, a visual representation of this network is depicted as follows:
+```{r}
+library(intergraph)
+pave <- asIgraph(net_agro)
+plot(pave,mode="fruchtermanreingold",vertex.cex=0.1)
+```
+In contrast, the network for the discipline of Civil Society and Organizations revealed a more complex structure, with a total of 792 vertices and 5,993 edges the connect these vertices. 
+
+```{r}
+net_CS <- network(CS, matrix.type = "edgelist", directed = FALSE, bipartite = FALSE)
+net_CS
+```
+
+Comparing all disciplines and documents from a network perspective aims to illustrate the multiple ways all these research projects from RRI Tool Kit connect among them, which helps identify where priorities are as a function of most needed goals in a globalized environment.
