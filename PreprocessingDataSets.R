@@ -22,3 +22,5 @@ Technologies <- LT[c(1:2, 7, 14, 16, 41)]
 Education <- LT[c(1:2, 15, 43)]
 # Govern = Governance + policy design + public engagement
 Govern <- LT[c(1:2, 25, 34, 32)]
+# Civil Society
+CivSoc <- LT[c(1:2, 9)]
