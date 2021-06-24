@@ -20,6 +20,8 @@ disciplines <- LT[1:47]
 As the initial data base contained several disciplines with quite similar categories (e.g., agrobiotechnology, agriculture, plant biology, smart farming), we decided to merge these categories under a single name. The resulting merged categories were re-named as follows:
 
 * Agro = agribiotechnology + agriculture + plant biology + smart farming + Food + Food, agriculture, forestry, water and bio-economy + plant biology + rural environment
+* Business & Industry
+* Civil Society & Organization
 * Climate = climate action + climate adaptation strategies + climate crisis + Climate, environment, and resources
 * Energy = Energy + energy transition + renewable energy
 * Ethics = ai ethics + Ethics + ethics of ai + responsible technology + security
@@ -27,3 +29,71 @@ As the initial data base contained several disciplines with quite similar catego
 * Technologies = Artificial intelligence + Digital technologies + emerging technologies + robotics
 * Education = Education Community + Science education
 * Govern = Governance + policy design + public engagement
+
+```{r, echo=FALSE}
+library(dplyr)
+# Agro = agribiotechnology + agriculture + plant biology + smart farming + Food + Food, agriculture, forestry, water and bio-economy + plant biology + rural environment
+Agro <-  LT[c(1:2, 4, 5, 33, 45, 21, 22, 42)]
+Agro <- Agro %>% mutate(sum = rowSums(.[3:9])) %>% mutate(agro = ifelse(sum >= 1, 1, 0))
+Agro <- Agro[c(1,2,11)]
+# Business & Industry
+Business <- LT[c(1:2, 8)]
+Business <- Business %>% mutate(sum = Business$`Business & Industry`*1) %>% mutate(busi = ifelse(sum >= 1, 1, 0))
+Business <- Business[c(1,2,5)]
+# Climate = climate action + climate adaptation strategies + climate crisis + Climate, environment, and resources
+Climate <- LT[c(1:2, 10:13)]
+Climate <- Climate %>% mutate(sum = rowSums(.[3:6])) %>% mutate(climate = ifelse(sum >= 1, 1, 0))
+Climate <- Climate[c(1,2,8)]
+# Energy = Energy + energy transition + renewable energy
+Energy <- LT[c(1:2, 17, 18, 38)]
+Energy <- Energy %>% mutate(sum = rowSums(.[3:5])) %>% mutate(energy = ifelse(sum >= 1, 1, 0))
+Energy <- Energy[c(1,2,7)]
+# Ethics = ai ethics + Ethics + ethics of ai + responsible technology + security
+Ethics <- LT[c(1:2, 6, 19, 20, 40, 44)]
+Ethics <- Ethics %>% mutate(sum = rowSums(.[3:7])) %>% mutate(ethics = ifelse(sum >= 1, 1, 0))
+Ethics <- Ethics[c(1,2,9)]
+# Health = health care + health technology + Health, demography & wellbeing + patient engagement + vaccine hesitancy + vaccines
+Health <- LT[c(1:2, 27, 28, 29, 32, 46, 47)]
+Health <- Health %>% mutate(sum = rowSums(.[3:8])) %>% mutate(health = ifelse(sum >= 1, 1, 0))
+Health <- Health[c(1,2,10)]
+# Policy-Makers == 1
+PM <- LT[c(1:2, 35)]
+PM <- PM %>% mutate(sum = PM$`Policy Makers`*1) %>% mutate(policy = ifelse(sum >= 1, 1, 0))
+PM <- PM[c(1:2,5)]
+# Technologies = Artificial intelligence + Digital technologies + emerging technologies + robotics
+Technologies <- LT[c(1:2, 7, 14, 16, 41)]
+Technologies <- Technologies %>% mutate(sum = rowSums(.[3:6])) %>% mutate(technologies = ifelse(sum >= 1, 1, 0))
+Technologies <- Technologies[c(1,2,8)]
+# Education = Education Community + Science education
+Education <- LT[c(1:2, 15, 43)]
+Education <- Education %>% mutate(sum = rowSums(.[3:4])) %>% mutate(education = ifelse(sum >= 1, 1, 0))
+Education <- Education[c(1,2,6)]
+# Govern = Governance + policy design + public engagement
+Govern <- LT[c(1:2, 25, 34, 32)]
+Govern <- Govern %>% mutate(sum = rowSums(.[3:5])) %>% mutate(govern = ifelse(sum >= 1, 1, 0))
+Govern <- Govern[c(1,2,7)]
+# Civil Society
+CivSoc <- LT[c(1:2, 9)]
+CivSoc <- CivSoc %>% mutate(sum = rowSums(.[3])) %>% mutate(civsoc = ifelse(sum >= 1, 1, 0))
+CivSoc <- CivSoc[c(1,2,5)]
+Disciplines <- list(Agro, Business, CivSoc, Climate, Education, Energy, Ethics, Govern, Health, PM, Technologies)
+rm(list=setdiff(ls(), "Disciplines"))
+Disciplines <- do.call(cbind.data.frame, Disciplines)
+```
+
+Now, we have a clean data set to use for further analyses.
+```{r}
+Disciplines <- Disciplines[c(3, 6,9,12,15,18,21,24,27, 30, 33)]
+variable.names(Disciplines)
+```
+We start by estimating the mutual information between categorized documents as a first general analysis
+```{r}
+library(infotheo)
+DIM <- mutinformation(Disciplines, method = "mm")
+library(corrplot)
+library(RColorBrewer)
+whiteblack <- colorRampPalette(c("#FFFFFF", "#E5E5E5", "#F3F3F3", "#D8D8D8", "#B1B1B1", "#8A8A8A", "#5D5D5D", "#000000"))
+corrplot(DIM, is.corr = FALSE, cl.lim=c(min(DIM), max(DIM)), method = "number", type = "lower", col=whiteblack(6), tl.col = "black")
+
+```
+

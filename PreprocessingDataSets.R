@@ -50,8 +50,8 @@ Govern <- Govern[c(1,2,7)]
 CivSoc <- LT[c(1:2, 9)]
 CivSoc <- CivSoc %>% mutate(sum = rowSums(.[3])) %>% mutate(civsoc = ifelse(sum >= 1, 1, 0))
 CivSoc <- CivSoc[c(1,2,5)]
-Disciplines <- list(Agro, CivSoc, Climate, Education, Energy, Ethics, Govern, Health, Technologies)
+Disciplines <- list(Agro, Business, CivSoc, Climate, Education, Energy, Ethics, Govern, Health, PM, Technologies)
 rm(list=setdiff(ls(), "Disciplines"))
 Disciplines <- do.call(cbind.data.frame, Disciplines)
 variable.names(Disciplines)
-Disciplines <- Disciplines[c(3, 6,9,12,15,18,21,24,27)]
+Disciplines <- Disciplines[c(3, 6,9,12,15,18,21,24,27, 30, 33)]
